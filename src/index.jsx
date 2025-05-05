@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import WaterScene from './WaterScene'
 import * as THREE from 'three'
+// import { EffectComposer, DepthOfField, ToneMapping } from '@react-three/postprocessing'
 import './style.css'
 
 const root = ReactDOM.createRoot(document.querySelector('#root'))
@@ -24,6 +25,12 @@ root.render(
       <Suspense fallback={null}>
         <WaterScene />
       </Suspense>
+
+      {/* As of three > r154 tonemapping is not applied on rendertargets any longer, it requires a pass */}
+      {/* <EffectComposer disableNormalPass multisampling={0}>
+        <DepthOfField target={[0, 0, 60]} focalLength={0.4} bokehScale={14} height={700} />
+        <ToneMapping />
+      </EffectComposer> */}
     </Canvas>
   </div>
 )
