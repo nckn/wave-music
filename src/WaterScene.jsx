@@ -1,16 +1,16 @@
-import { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
-import { useControls } from 'leva'
+import { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+import { useControls } from 'leva';
 
-import waterVertexShader from './shaders/water/vertex.glsl'
-import waterFragmentShader from './shaders/water/fragment.glsl'
+import waterVertexShader from './shaders/water/vertex.glsl';
+import waterFragmentShader from './shaders/water/fragment.glsl';
 
-export default function WaterScene() {
-  const waterRef = useRef()
-  const clockRef = useRef(new THREE.Clock())
+export default function IcoSphereScene() {
+  const sphereRef = useRef();
+  const clockRef = useRef(new THREE.Clock());
 
-  // Leva controls
+  // Leva controls (no changes needed here)
   const controls = useControls({
     depthColor: '#ff4000',
     surfaceColor: '#151c37',
@@ -23,15 +23,15 @@ export default function WaterScene() {
     smallWavesSpeed: { value: 0.2, min: 0, max: 4, step: 0.001 },
     smallIterations: { value: 4, min: 0, max: 5, step: 1 },
     colorOffset: { value: 0.925, min: 0, max: 1, step: 0.001 },
-    colorMultiplier: { value: 1, min: 0, max: 10, step: 0.001 }
-  })
+    colorMultiplier: { value: 1, min: 0, max: 10, step: 0.001 },
+  });
 
-  // Create uniforms once
+  // Create uniforms once (no changes needed here)
   const uniforms = useRef({
     uTime: { value: 0 },
     uBigWavesElevation: { value: controls.bigWavesElevation },
     uBigWavesFrequency: {
-      value: new THREE.Vector2(controls.bigWavesFrequencyX, controls.bigWavesFrequencyY)
+      value: new THREE.Vector2(controls.bigWavesFrequencyX, controls.bigWavesFrequencyY),
     },
     uBigWavesSpeed: { value: controls.bigWavesSpeed },
 
@@ -43,37 +43,36 @@ export default function WaterScene() {
     uDepthColor: { value: new THREE.Color(controls.depthColor) },
     uSurfaceColor: { value: new THREE.Color(controls.surfaceColor) },
     uColorOffset: { value: controls.colorOffset },
-    uColorMultiplier: { value: controls.colorMultiplier }
-  })
+    uColorMultiplier: { value: controls.colorMultiplier },
+  });
 
   useFrame(() => {
-    const elapsedTime = clockRef.current.getElapsedTime()
+    const elapsedTime = clockRef.current.getElapsedTime();
+    uniforms.current.uTime.value = elapsedTime;
 
-    uniforms.current.uTime.value = elapsedTime
-
-    // Update Leva-controlled uniforms dynamically
-    uniforms.current.uBigWavesElevation.value = controls.bigWavesElevation
+    // Update Leva-controlled uniforms dynamically (no changes needed here)
+    uniforms.current.uBigWavesElevation.value = controls.bigWavesElevation;
     uniforms.current.uBigWavesFrequency.value.set(
       controls.bigWavesFrequencyX,
       controls.bigWavesFrequencyY
-    )
-    uniforms.current.uBigWavesSpeed.value = controls.bigWavesSpeed
+    );
+    uniforms.current.uBigWavesSpeed.value = controls.bigWavesSpeed;
 
-    uniforms.current.uSmallWavesElevation.value = controls.smallWavesElevation
-    uniforms.current.uSmallWavesFrequency.value = controls.smallWavesFrequency
-    uniforms.current.uSmallWavesSpeed.value = controls.smallWavesSpeed
-    uniforms.current.uSmallIterations.value = controls.smallIterations
+    uniforms.current.uSmallWavesElevation.value = controls.smallWavesElevation;
+    uniforms.current.uSmallWavesFrequency.value = controls.smallWavesFrequency;
+    uniforms.current.uSmallWavesSpeed.value = controls.smallWavesSpeed;
+    uniforms.current.uSmallIterations.value = controls.smallIterations;
 
-    uniforms.current.uDepthColor.value.set(controls.depthColor)
-    uniforms.current.uSurfaceColor.value.set(controls.surfaceColor)
-    uniforms.current.uColorOffset.value = controls.colorOffset
-    uniforms.current.uColorMultiplier.value = controls.colorMultiplier
-  })
+    uniforms.current.uDepthColor.value.set(controls.depthColor);
+    uniforms.current.uSurfaceColor.value.set(controls.surfaceColor);
+    uniforms.current.uColorOffset.value = controls.colorOffset;
+    uniforms.current.uColorMultiplier.value = controls.colorMultiplier;
+  });
 
   return (
-    <> 
-      <mesh ref={waterRef} rotation-x={-Math.PI * 0.5}>
-        <planeGeometry args={[2, 2, 512, 512]} />
+    <>
+      <mesh ref={sphereRef}>
+        <icosahedronGeometry args={[1, 128]} /> {/* Increased detail for smoother waves */}
         <shaderMaterial
           vertexShader={waterVertexShader}
           fragmentShader={waterFragmentShader}
@@ -81,5 +80,5 @@ export default function WaterScene() {
         />
       </mesh>
     </>
-  )
+  );
 }
