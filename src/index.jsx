@@ -1,5 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { Suspense } from 'react'
+import { OrbitControls, Grid } from '@react-three/drei'
 import ReactDOM from 'react-dom/client'
 import WaterScene from './WaterScene'
 import * as THREE from 'three'
@@ -26,9 +27,13 @@ root.render(
         <WaterScene />
       </Suspense>
 
+      <OrbitControls enableDamping />
+
+      <axesHelper args={[5]} />
+
       {/* As of three > r154 tonemapping is not applied on rendertargets any longer, it requires a pass */}
       <EffectComposer disableNormalPass multisampling={0}>
-        <DepthOfField target={[0, 0, 60]} focalLength={0.2} bokehScale={14} height={700} />
+        <DepthOfField target={[0, 0, 0]} focalLength={0.01} bokehScale={14} height={700} />
         {/* <ToneMapping /> */}
       </EffectComposer>
     </Canvas>

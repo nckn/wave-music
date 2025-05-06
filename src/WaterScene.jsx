@@ -1,6 +1,5 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { useControls } from 'leva'
 
@@ -72,8 +71,7 @@ export default function WaterScene() {
   })
 
   return (
-    <>
-      <OrbitControls enableDamping />
+    <> 
       <mesh ref={waterRef} rotation-x={-Math.PI * 0.5}>
         <planeGeometry args={[2, 2, 512, 512]} />
         <shaderMaterial
