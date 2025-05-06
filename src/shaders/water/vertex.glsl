@@ -14,17 +14,15 @@ varying vec3 vPosition;
 
 #include ../includes/perlinClassic3D.glsl
 
-float waveElevation(vec3 position, vec3 normal) // Added normal parameter
+float waveElevation(vec3 position)
 {
-    float bigWave = sin(position.x * uBigWavesFrequency.x + uTime * uBigWavesSpeed) *
-                    sin(position.z * uBigWavesFrequency.y + uTime * uBigWavesSpeed) *
-                    uBigWavesElevation;
-
-    float elevation = bigWave;
+    float elevation = sin(position.x * uBigWavesFrequency.x + uTime * uBigWavesSpeed) *
+                      sin(position.z * uBigWavesFrequency.y + uTime * uBigWavesSpeed) *
+                      uBigWavesElevation;
 
     for(float i = 1.0; i <= uSmallIterations; i++)
     {
-        elevation -= abs(perlinClassic3D(position * uSmallWavesFrequency * i + vec3(0.0, uTime * uSmallWavesSpeed, 0.0)) * uSmallWavesElevation / i);
+        elevation -= abs(perlinClassic3D(vec3(position.xz * uSmallWavesFrequency * i, uTime * uSmallWavesSpeed)) * uSmallWavesElevation / i);
     }
 
     return elevation;
@@ -34,36 +32,29 @@ void main()
 {
     // Base position
     vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-    vec3 worldPosition = modelPosition.xyz;
 
-    // Calculate the original normal (before displacement)
-    vec3 normal = normalize(position); // For icosphere, position is proportional to normal
-
-    // Elevation based on world position and original normal
-    float elevation = waveElevation(worldPosition, normal); // Pass normal to waveElevation
-    modelPosition.xyz += normal * elevation; // Displace along the normal
-
-    // Compute normal (approximate using finite differences on the sphere)
     float shift = 0.01;
-    vec3 positionA = position + vec3(shift, 0.0, 0.0);
-    vec3 positionB = position + vec3(0.0, shift, 0.0);
-    vec3 positionC = position + vec3(0.0, 0.0, shift);
+    vec3 modelPositionA = modelPosition.xyz + vec3(shift, 0.0, 0.0);
+    vec3 modelPositionB = modelPosition.xyz + vec3(0.0, 0.0, - shift);
 
-    vec4 modelPositionA = modelMatrix * vec4(positionA, 1.0);
-    vec4 modelPositionB = modelMatrix * vec4(positionB, 1.0);
-    vec4 modelPositionC = modelMatrix * vec4(positionC, 1.0);
+    // Elevation
+    float elevation = waveElevation(modelPosition.xyz);
+    float elevationA = waveElevation(modelPositionA);
+    float elevationB = waveElevation(modelPositionB);
+    
+    modelPosition.y += elevation;
+    
+    // Displace along the normal:
+    // vec3 normal = normalize(position); // For a sphere centered at the origin
+    // modelPosition.xyz += normal * elevation;
 
-    float elevationA = waveElevation(modelPositionA.xyz, normalize(positionA));
-    float elevationB = waveElevation(modelPositionB.xyz, normalize(positionB));
-    float elevationC = waveElevation(modelPositionC.xyz, normalize(positionC));
+    modelPositionA.y += elevationA;
+    modelPositionB.y += elevationB;
 
-    vec3 worldPositionA = modelPositionA.xyz + normalize(positionA) * elevationA;
-    vec3 worldPositionB = modelPositionB.xyz + normalize(positionB) * elevationB;
-    vec3 worldPositionC = modelPositionC.xyz + normalize(positionC) * elevationC;
-
-    vec3 normalA = normalize(worldPositionB - worldPosition);
-    vec3 normalB = normalize(worldPositionC - worldPosition);
-    vec3 computedNormal = normalize(cross(normalA, normalB));
+    // Compute normal
+    vec3 toA = normalize(modelPositionA - modelPosition.xyz);
+    vec3 toB = normalize(modelPositionB - modelPosition.xyz);
+    vec3 computedNormal = cross(toA, toB);
 
     // Final position
     vec4 viewPosition = viewMatrix * modelPosition;
@@ -73,5 +64,6 @@ void main()
     // Varyings
     vElevation = elevation;
     vNormal = computedNormal;
-    vPosition = worldPosition;
+    // vNormal = normalize(computedNormal);
+    vPosition = modelPosition.xyz;
 }

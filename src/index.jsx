@@ -33,7 +33,7 @@ root.render(
 
       {/* As of three > r154 tonemapping is not applied on rendertargets any longer, it requires a pass */}
       <EffectComposer disableNormalPass multisampling={0}>
-        {/* <DepthOfField target={[0, 0, 0]} focalLength={0.01} bokehScale={14} height={700} /> */}
+        <DepthOfField target={[0, 0, 0]} focalLength={0.01} bokehScale={14} height={700} />
         {/* <ToneMapping /> */}
       </EffectComposer>
     </Canvas>
