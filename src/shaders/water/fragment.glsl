@@ -23,22 +23,22 @@ void main()
 
     vec3 light = vec3(0.0);
     
-    // Add ambient light for better visibility
-    light += ambientLight(vec3(1.0), 0.4);
-    
-    // Add directional light from top
-    light += directionalLight(
-        vec3(1.0),
-        0.6,
-        normal,
-        vec3(0.0, 1.0, 0.0),
-        viewDirection,
-        10.0
-    );
-    
-    // Add point light with adjusted parameters based on geometry
     if (uIsSphere > 0.5) {
-        // For sphere, position point light at the center with higher intensity
+        // SPHERE LIGHTING (enhanced for better visibility)
+        // Add ambient light for better visibility
+        light += ambientLight(vec3(1.0), 0.4);
+        
+        // Add directional light from top
+        light += directionalLight(
+            vec3(1.0),
+            0.6,
+            normal,
+            vec3(0.0, 1.0, 0.0),
+            viewDirection,
+            10.0
+        );
+        
+        // Add point light at center
         light += pointLight(
             vec3(1.0, 0.8, 0.6),  // Warmer light color
             15.0,                  // Higher intensity
@@ -50,7 +50,7 @@ void main()
             0.5                    // Less decay for sphere
         );
     } else {
-        // Original point light for plane
+        // ORIGINAL PLANE LIGHTING (unchanged)
         light += pointLight(
             vec3(1.0),
             10.0,

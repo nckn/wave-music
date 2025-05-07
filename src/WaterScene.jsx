@@ -11,7 +11,7 @@ export default function WaterScene() {
   const waterRef = useRef()
   const clockRef = useRef(new THREE.Clock())
 
-  // Leva controls with geometry selection and lighting
+  // Leva controls with geometry selection
   const controls = useControls({
     geometry: { options: ['plane', 'icosphere'] },
     resolution: { value: 512, min: 32, max: 1024, step: 32 },
@@ -97,22 +97,28 @@ export default function WaterScene() {
     }
   }
 
+  const isIcosphere = controls.geometry === 'icosphere'
+
   return (
     <>
       <OrbitControls enableDamping />
       
-      {/* Scene lighting for better visibility */}
-      <ambientLight intensity={0.2} />
-      <directionalLight position={[1, 1, 1]} intensity={0.5} />
+      {/* Only add scene lighting when using icosphere */}
+      {isIcosphere && (
+        <>
+          <ambientLight intensity={0.2} />
+          <directionalLight position={[1, 1, 1]} intensity={0.5} />
+        </>
+      )}
       
       <mesh 
         ref={waterRef} 
-        rotation-x={controls.geometry === 'plane' ? -Math.PI * 0.5 : 0}
+        rotation-x={isIcosphere ? 0 : -Math.PI * 0.5}
       >
-        {controls.geometry === 'plane' ? (
-          <planeGeometry args={[2, 2, controls.resolution, controls.resolution]} />
-        ) : (
+        {isIcosphere ? (
           <icosahedronGeometry args={[controls.sphereRadius, controls.sphereDetail]} />
+        ) : (
+          <planeGeometry args={[2, 2, controls.resolution, controls.resolution]} />
         )}
         <shaderMaterial
           vertexShader={waterVertexShader}
