@@ -1,8 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
-import { useControls } from 'leva'
+import { useControls, folder } from 'leva'
 
 import waterVertexShader from './shaders/water/vertex.glsl'
 import waterFragmentShader from './shaders/water/fragment.glsl'
@@ -11,24 +10,41 @@ export default function WaterScene() {
   const waterRef = useRef()
   const clockRef = useRef(new THREE.Clock())
 
-  // Leva controls with geometry selection
+  // Leva controls with folders for better organization
   const controls = useControls({
-    geometry: { options: ['plane', 'icosphere'] },
-    resolution: { value: 512, min: 32, max: 1024, step: 32 },
-    sphereRadius: { value: 1, min: 0.5, max: 2, step: 0.1 },
-    sphereDetail: { value: 16, min: 1, max: 64, step: 1 },
-    depthColor: '#ff4000',
-    surfaceColor: '#151c37',
-    bigWavesElevation: { value: 0.2, min: 0, max: 1, step: 0.001 },
-    bigWavesFrequencyX: { value: 4, min: 0, max: 10, step: 0.001 },
-    bigWavesFrequencyY: { value: 1.5, min: 0, max: 10, step: 0.001 },
-    bigWavesSpeed: { value: 0.75, min: 0, max: 4, step: 0.001 },
-    smallWavesElevation: { value: 0.15, min: 0, max: 1, step: 0.001 },
-    smallWavesFrequency: { value: 3, min: 0, max: 30, step: 0.001 },
-    smallWavesSpeed: { value: 0.2, min: 0, max: 4, step: 0.001 },
-    smallIterations: { value: 4, min: 0, max: 5, step: 1 },
-    colorOffset: { value: 0.925, min: 0, max: 1, step: 0.001 },
-    colorMultiplier: { value: 1, min: 0, max: 10, step: 0.001 }
+    Geometry: folder({
+      geometry: { options: ['plane', 'icosphere'] },
+      resolution: { value: 512, min: 32, max: 1024, step: 32 },
+      sphereRadius: { value: 1, min: 0.5, max: 2, step: 0.1 },
+      sphereDetail: { value: 64, min: 1, max: 64, step: 1 },
+    }),
+    
+    Colors: folder({
+      depthColor: '#ff4000',
+      surfaceColor: '#151c37',
+      colorOffset: { value: 0.925, min: 0, max: 1, step: 0.001 },
+      colorMultiplier: { value: 1, min: 0, max: 10, step: 0.001 },
+    }),
+    
+    'Big Waves': folder({
+      bigWavesElevation: { value: 0.2, min: 0, max: 1, step: 0.001 },
+      bigWavesFrequencyX: { value: 4, min: 0, max: 10, step: 0.001 },
+      bigWavesFrequencyY: { value: 1.5, min: 0, max: 10, step: 0.001 },
+      bigWavesSpeed: { value: 0.75, min: 0, max: 4, step: 0.001 },
+    }),
+    
+    'Small Waves': folder({
+      smallWavesElevation: { value: 0.15, min: 0, max: 1, step: 0.001 },
+      smallWavesFrequency: { value: 3, min: 0, max: 30, step: 0.001 },
+      smallWavesSpeed: { value: 0.2, min: 0, max: 4, step: 0.001 },
+      smallIterations: { value: 4, min: 0, max: 5, step: 1 },
+    }),
+    
+    'Depth of Field': folder({
+      enableDOF: { value: false }, // Default off
+      focalLength: { value: 0.01, min: 0.001, max: 0.1, step: 0.001 },
+      bokehScale: { value: 14, min: 1, max: 30, step: 1 },
+    }),
   })
 
   // Create uniforms once
@@ -101,8 +117,6 @@ export default function WaterScene() {
 
   return (
     <>
-      <OrbitControls enableDamping />
-      
       {/* Only add scene lighting when using icosphere */}
       {isIcosphere && (
         <>
