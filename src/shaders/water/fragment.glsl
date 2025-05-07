@@ -2,6 +2,7 @@ uniform vec3 uDepthColor;
 uniform vec3 uSurfaceColor;
 uniform float uColorOffset;
 uniform float uColorMultiplier;
+uniform float uIsSphere;
 
 varying float vElevation;
 varying vec3 vNormal;
@@ -21,17 +22,46 @@ void main()
     vec3 color = mix(uDepthColor, uSurfaceColor, mixStrength);
 
     vec3 light = vec3(0.0);
-
-    light += pointLight(
+    
+    // Add ambient light for better visibility
+    light += ambientLight(vec3(1.0), 0.4);
+    
+    // Add directional light from top
+    light += directionalLight(
         vec3(1.0),
-        10.0,
+        0.6,
         normal,
-        vec3(0.0, 0.25, 0.0),
+        vec3(0.0, 1.0, 0.0),
         viewDirection,
-        30.0,
-        vPosition,
-        0.95
+        10.0
     );
+    
+    // Add point light with adjusted parameters based on geometry
+    if (uIsSphere > 0.5) {
+        // For sphere, position point light at the center with higher intensity
+        light += pointLight(
+            vec3(1.0, 0.8, 0.6),  // Warmer light color
+            15.0,                  // Higher intensity
+            normal,
+            vec3(0.0, 0.0, 0.0),  // Light at center
+            viewDirection,
+            20.0,
+            vPosition,
+            0.5                    // Less decay for sphere
+        );
+    } else {
+        // Original point light for plane
+        light += pointLight(
+            vec3(1.0),
+            10.0,
+            normal,
+            vec3(0.0, 0.25, 0.0),
+            viewDirection,
+            30.0,
+            vPosition,
+            0.95
+        );
+    }
     
     color *= light;
     

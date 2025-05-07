@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-
+import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { useControls } from 'leva'
 
@@ -11,8 +11,12 @@ export default function WaterScene() {
   const waterRef = useRef()
   const clockRef = useRef(new THREE.Clock())
 
-  // Leva controls
+  // Leva controls with geometry selection and lighting
   const controls = useControls({
+    geometry: { options: ['plane', 'icosphere'] },
+    resolution: { value: 512, min: 32, max: 1024, step: 32 },
+    sphereRadius: { value: 1, min: 0.5, max: 2, step: 0.1 },
+    sphereDetail: { value: 16, min: 1, max: 64, step: 1 },
     depthColor: '#ff4000',
     surfaceColor: '#151c37',
     bigWavesElevation: { value: 0.2, min: 0, max: 1, step: 0.001 },
@@ -44,13 +48,19 @@ export default function WaterScene() {
     uDepthColor: { value: new THREE.Color(controls.depthColor) },
     uSurfaceColor: { value: new THREE.Color(controls.surfaceColor) },
     uColorOffset: { value: controls.colorOffset },
-    uColorMultiplier: { value: controls.colorMultiplier }
+    uColorMultiplier: { value: controls.colorMultiplier },
+    
+    // Add a uniform to tell the shader if we're using a sphere
+    uIsSphere: { value: controls.geometry === 'icosphere' ? 1.0 : 0.0 }
   })
 
   useFrame(() => {
     const elapsedTime = clockRef.current.getElapsedTime()
 
     uniforms.current.uTime.value = elapsedTime
+
+    // Update geometry type if changed
+    uniforms.current.uIsSphere.value = controls.geometry === 'icosphere' ? 1.0 : 0.0
 
     // Update Leva-controlled uniforms dynamically
     uniforms.current.uBigWavesElevation.value = controls.bigWavesElevation
@@ -71,14 +81,44 @@ export default function WaterScene() {
     uniforms.current.uColorMultiplier.value = controls.colorMultiplier
   })
 
+  // Function to handle Three.js shader includes
+  const onBeforeCompile = (shader) => {
+    // Process Three.js built-in include directives
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <tonemapping_fragment>',
+      THREE.ShaderChunk.tonemapping_fragment || ''
+    )
+    
+    if (shader.fragmentShader.includes('#include <colorspace_fragment>')) {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <colorspace_fragment>',
+        THREE.ShaderChunk.colorspace_fragment || ''
+      )
+    }
+  }
+
   return (
-    <> 
-      <mesh ref={waterRef} rotation-x={-Math.PI * 0.5}>
-        <planeGeometry args={[2, 2, 512, 512]} />
+    <>
+      <OrbitControls enableDamping />
+      
+      {/* Scene lighting for better visibility */}
+      <ambientLight intensity={0.2} />
+      <directionalLight position={[1, 1, 1]} intensity={0.5} />
+      
+      <mesh 
+        ref={waterRef} 
+        rotation-x={controls.geometry === 'plane' ? -Math.PI * 0.5 : 0}
+      >
+        {controls.geometry === 'plane' ? (
+          <planeGeometry args={[2, 2, controls.resolution, controls.resolution]} />
+        ) : (
+          <icosahedronGeometry args={[controls.sphereRadius, controls.sphereDetail]} />
+        )}
         <shaderMaterial
           vertexShader={waterVertexShader}
           fragmentShader={waterFragmentShader}
           uniforms={uniforms.current}
+          onBeforeCompile={onBeforeCompile}
         />
       </mesh>
     </>
