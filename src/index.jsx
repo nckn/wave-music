@@ -27,7 +27,7 @@ root.render(
         <WaterScene />
       </Suspense>
 
-      <OrbitControls enableDamping />
+      <OrbitControls enableDamping zoomSpeed={0.1} />
 
       <axesHelper args={[5]} />
 
