@@ -18,7 +18,7 @@ root.render(
       //   near: 0.1,
       //   far: 100
       // }}
-      camera={{ position: [-1.5, 1, 5.5], fov: 45, near: 1, far: 20 }}
+      camera={{ position: [-5, 0, 0], fov: 45, near: 1, far: 20 }}
       gl={{ 
         toneMapping: THREE.ACESFilmicToneMapping,
         pixelRatio: Math.min(window.devicePixelRatio, 2)
@@ -27,11 +27,11 @@ root.render(
       <hemisphereLight intensity={0.15} groundColor="black" />
       <spotLight decay={0} position={[10, 20, 10]} angle={0.12} penumbra={1} intensity={1} castShadow shadow-mapSize={1024} />
       
-      <Suspense fallback={null}>
-        <group position={[0, 0, 0]} >
-          <WaterScene />
-        </group>
-      </Suspense>
+              <Suspense fallback={null}>
+          <group position={[0, 0.5, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <WaterScene />
+          </group>
+        </Suspense>
 
       <OrbitControls enableDamping zoomSpeed={0.1} />
 

@@ -16,6 +16,12 @@ varying vec3 vPosition;
 
 float waveElevation(vec3 position)
 {
+    // TODO: MODIFY HERE - This function calculates wave elevation
+    // For rotated plane, you may need to:
+    // 1. Add rotation compensation for position coordinates
+    // 2. Change which axes are used for wave calculation (X/Y vs X/Z)
+    // 3. Consider adding a uPlaneRotation uniform
+    
     float elevation = sin(position.x * uBigWavesFrequency.x + uTime * uBigWavesSpeed) *
                       sin(position.z * uBigWavesFrequency.y + uTime * uBigWavesSpeed) *
                       uBigWavesElevation;
@@ -88,7 +94,12 @@ void main()
         computedNormal = normalize(cross(toA, toB));
     } 
     else {
-        // PLANE MODE (original code)
+        // TODO: MODIFY HERE - PLANE MODE displacement calculation
+        // For rotated plane, you need to:
+        // 1. Calculate the correct plane normal based on rotation
+        // 2. Change displacement direction from Y-axis to plane normal
+        // 3. Update tangent calculations for proper normal computation
+        
         float shift = 0.01;
         vec3 modelPositionA = modelPosition.xyz + vec3(shift, 0.0, 0.0);
         vec3 modelPositionB = modelPosition.xyz + vec3(0.0, 0.0, -shift);
